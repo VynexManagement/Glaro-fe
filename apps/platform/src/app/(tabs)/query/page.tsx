@@ -775,7 +775,7 @@ function QueryContent() {
             <div className="space-y-1">
               <h4 className="text-base font-extrabold tracking-tight">Export your findings</h4>
               <p className="text-indigo-100 text-xs max-w-xl leading-relaxed font-medium">
-                You've discovered {totalCount.toLocaleString()} potential leads. Unlock the full Lead Library to access verified founder emails and LinkedIn profiles.
+                You&apos;ve discovered {totalCount.toLocaleString()} potential leads. Unlock the full Lead Library to access verified founder emails and LinkedIn profiles.
               </p>
             </div>
             <button

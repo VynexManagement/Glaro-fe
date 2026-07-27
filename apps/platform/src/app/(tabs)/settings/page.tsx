@@ -1,15 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { 
-  User, 
-  Loader2, 
-  ShieldCheck, 
-  Lock
-} from "lucide-react";
+import { User, Loader2 } from "lucide-react";
 import AuthGuard from "@/components/AuthGuard";
 import { useProfile } from "@/features/dashboard/hooks/useProfile";
 import { supabase } from "@/lib/supabase";
+import { PageHeader, SectionHeader } from "@leadflow/ui";
 
 function SettingsContent() {
   const {
@@ -53,16 +49,11 @@ function SettingsContent() {
 
   return (
     <div className="min-h-screen px-6 py-10 max-w-6xl mx-auto space-y-8 select-none">
-      
       {/* Top Header Row */}
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-          System Settings
-        </h1>
-        <p className="text-slate-500 text-sm mt-1">
-          Manage your lead intelligence engine and account preferences.
-        </p>
-      </div>
+      <PageHeader
+        title="System Settings"
+        description="Manage your lead intelligence engine and account preferences."
+      />
 
       {loadingProfile ? (
         <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-2">
@@ -71,17 +62,13 @@ function SettingsContent() {
         </div>
       ) : (
         <div className="max-w-2xl bg-white border border-slate-100 rounded-2xl shadow-[0_15px_40px_-15px_rgba(0,0,0,0.02)] p-8">
-          
-          <div className="flex items-center gap-3 border-b border-slate-100 pb-5 mb-6">
-            <User className="text-indigo-600 w-5 h-5" />
-            <div>
-              <h2 className="text-base font-bold text-slate-900 leading-none">Account Settings</h2>
-              <p className="text-slate-400 text-[11px] mt-1 font-semibold uppercase tracking-wider">Manage your personal information and security.</p>
-            </div>
-          </div>
+          <SectionHeader
+            title="Account Settings"
+            subtitle="Manage your personal information and security."
+            icon={<User className="text-indigo-600 w-5 h-5" />}
+          />
 
           <form onSubmit={handleSaveSettings} className="space-y-6">
-            
             {/* Full Name field */}
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -155,12 +142,9 @@ function SettingsContent() {
                 )}
               </button>
             </div>
-
           </form>
-
         </div>
       )}
-
     </div>
   );
 }
