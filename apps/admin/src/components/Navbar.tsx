@@ -45,7 +45,7 @@ export default function Navbar() {
         <Link href="/" className="flex items-center gap-2 text-[#eeeeee] font-bold text-xl">
           <Zap className="text-[#00adb5] w-6 h-6" />
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#00adb5] to-[#ffd6ba]">
-            LeadFlow
+            Glaro
           </span>
         </Link>
 

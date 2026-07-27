@@ -129,7 +129,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
               <div className="flex flex-col">
                 <span className="font-extrabold text-lg tracking-tight text-slate-900 leading-none">
-                  LeadFlow
+                  Glaro
                 </span>
                 <span className="text-[9px] font-bold text-slate-400 tracking-wider uppercase mt-1">
                   Admin Portal

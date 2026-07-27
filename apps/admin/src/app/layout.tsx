@@ -10,8 +10,8 @@ const sans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "LeadFlow | Admin Portal",
-  description: "LeadFlow backend and operations console",
+  title: "Glaro | Admin Portal",
+  description: "Glaro backend and operations console",
 };
 
 export default function RootLayout({

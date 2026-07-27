@@ -88,7 +88,7 @@ function PaymentContent() {
         key: order.key_id,
         amount: order.amount,
         currency: order.currency,
-        name: "LeadFlow",
+        name: "Glaro",
         description: `${(context.niches?.length ? context.niches.join(", ") : context.niche) || "Dataset"} × ${(context.countries?.length ? context.countries.join(", ") : context.country) || ""} Leads`,
         order_id: order.order_id,
         handler: async (response: {

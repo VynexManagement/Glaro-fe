@@ -10,8 +10,8 @@ const sans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "LeadFlow Console",
-  description: "LeadFlow Client Console",
+  title: "Glaro Console",
+  description: "Glaro Client Console",
 };
 
 export default function RootLayout({

@@ -10,7 +10,8 @@ import {
   LogOut, 
   ChevronLeft, 
   ChevronRight, 
-  Zap 
+  Zap,
+  Compass
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
@@ -66,6 +67,12 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
       isActive: pathname === "/lead-library"
     },
     {
+      label: "Signal Library",
+      path: "/signals",
+      Icon: Compass,
+      isActive: pathname === "/signals"
+    },
+    {
       label: "Settings",
       path: "/settings",
       Icon: Settings,
@@ -104,7 +111,7 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
               </div>
               <div className="flex flex-col">
                 <span className="font-extrabold text-lg tracking-tight text-slate-900 leading-none">
-                  LeadFlow
+                  Glaro
                 </span>
                 <span className="text-[9px] font-bold text-slate-400 tracking-wider uppercase mt-1">
                   Lead Intelligence

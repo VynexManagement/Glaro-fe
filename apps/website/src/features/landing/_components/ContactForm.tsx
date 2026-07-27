@@ -19,7 +19,7 @@ export function ContactForm() {
           Get in Touch
         </h2>
         <p className="mt-3 text-slate-500 text-base">
-          Have questions? We're here to help you scale your Shopify agency.
+          Have questions? We&apos;re here to help you scale your Shopify agency.
         </p>
       </div>
 
@@ -30,7 +30,7 @@ export function ContactForm() {
               ✓
             </div>
             <h3 className="text-lg font-bold text-slate-900">Message Received!</h3>
-            <p className="text-slate-500 mt-2 text-sm">We'll get back to you within 24 hours.</p>
+            <p className="text-slate-500 mt-2 text-sm">We&apos;ll get back to you within 24 hours.</p>
             <Button
               variant="outline"
               className="mt-6 text-sm border-slate-200"
@@ -105,7 +105,7 @@ export function ContactForm() {
             className="flex items-center gap-2 text-slate-500 hover:text-[#6366f1] transition-colors text-sm font-medium"
           >
             <Mail className="w-4 h-4 text-indigo-500" strokeWidth={2} />
-            <span>hello@leadflow.io</span>
+            <span>hello@glaro.io</span>
           </a>
           <a
             href="https://calendly.com/leadflow"

@@ -11,7 +11,7 @@ export function CTASection() {
           Ready to scale your outreach?
         </h2>
         <p className="mt-4 text-slate-500 text-base md:text-lg max-w-lg leading-relaxed">
-          Join thousands of sales teams who are already closing more deals with LeadFlow.
+          Join thousands of sales teams who are already closing more deals with Glaro.
         </p>
         <Button
           variant="primary"

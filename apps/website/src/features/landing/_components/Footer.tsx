@@ -11,10 +11,10 @@ export function Footer() {
         {/* Left Column */}
         <div className="space-y-3">
           <span className="text-xl font-bold text-slate-900 tracking-tight">
-            LeadFlow
+            Glaro
           </span>
           <p className="text-sm text-slate-400">
-            © {year} LeadFlow Intelligence. All rights reserved.
+            © {year} Glaro Intelligence. All rights reserved.
           </p>
         </div>
         

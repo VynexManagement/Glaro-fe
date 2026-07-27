@@ -37,7 +37,7 @@ export function Navbar({
         {/* Logo */}
         <a href={homeUrl} className="flex items-center gap-2 text-slate-900 font-bold text-xl select-none">
           <span className="font-extrabold text-2xl tracking-tight bg-slate-900 text-transparent bg-clip-text">
-            LeadFlow
+            Glaro
           </span>
         </a>
 

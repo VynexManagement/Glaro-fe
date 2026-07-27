@@ -8,7 +8,7 @@ export function Footer() {
         {/* Brand & Mission */}
         <div className="space-y-4">
           <span className="text-xl font-bold text-slate-800">
-            LeadFlow
+            Glaro
           </span>
           <p className="text-sm text-slate-500 leading-relaxed max-w-xs">
             Premium Shopify store leads with real marketing-signal detection. Grow your sales pipeline faster.

@@ -95,7 +95,7 @@ function PreviewContent() {
         key: order.key_id,
         amount: order.amount,
         currency: order.currency,
-        name: "LeadFlow",
+        name: "Glaro",
         description: `Unlock ${selectedPlan === "pro" ? "500" : "200"} Leads Dataset`,
         order_id: order.order_id,
         handler: async (response: any) => {

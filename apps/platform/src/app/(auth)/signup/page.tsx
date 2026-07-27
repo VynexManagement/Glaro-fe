@@ -96,7 +96,7 @@ export default function SignupPage() {
               <Zap className="text-[#6366f1] w-5 h-5" strokeWidth={2.5} />
             </div>
             <span className="font-extrabold text-2xl tracking-tight text-slate-900">
-              LeadFlow
+              Glaro
             </span>
           </div>
           <div className="space-y-1">

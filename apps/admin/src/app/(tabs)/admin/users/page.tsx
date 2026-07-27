@@ -151,7 +151,7 @@ export default function AdminUsersPage() {
     : "AD";
 
   const triggerEmail = (email: string) => {
-    window.location.href = `mailto:${email}?subject=LeadFlow%20Dataset%20Support`;
+    window.location.href = `mailto:${email}?subject=Glaro%20Dataset%20Support`;
   };
 
   const triggerCustomOrder = (name: string) => {

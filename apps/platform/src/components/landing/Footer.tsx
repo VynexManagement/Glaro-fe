@@ -13,7 +13,7 @@ export function Footer() {
           <div className="inline-flex items-center gap-2">
             <Zap className="text-[#00adb5] w-6 h-6" />
             <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#00adb5] to-[#ffd6ba]">
-              LeadFlow
+              Glaro
             </span>
           </div>
           <p className="text-sm text-[#eeeeee]/60">
@@ -61,7 +61,7 @@ export function Footer() {
       </div>
       
       <div className="max-w-6xl mx-auto mt-12 pt-8 border-t border-white/5 text-center text-sm text-[#eeeeee]/40">
-        <p>© {new Date().getFullYear()} LeadFlow. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Glaro. All rights reserved.</p>
       </div>
     </footer>
   );

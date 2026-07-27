@@ -11,7 +11,7 @@ const sans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "LeadFlow | Premium Shopify Leads",
+  title: "Glaro | Premium Shopify Leads",
   description:
     "Find laser-targeted Shopify stores by niche, country, and marketing signal. Preview leads instantly, pay once, download your CSV.",
   keywords: "shopify leads, shopify stores, lead generation, email marketing leads",
