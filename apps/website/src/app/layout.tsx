@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import { Navbar } from "@leadflow/ui";
 import { Footer } from "../features/landing/_components/Footer";
 import "./globals.css";
+import LenisProvider from "./providers/lenis-provider";
 
 const sans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -14,7 +15,8 @@ export const metadata: Metadata = {
   title: "Glaro | Premium Shopify Leads",
   description:
     "Find laser-targeted Shopify stores by niche, country, and marketing signal. Preview leads instantly, pay once, download your CSV.",
-  keywords: "shopify leads, shopify stores, lead generation, email marketing leads",
+  keywords:
+    "shopify leads, shopify stores, lead generation, email marketing leads",
 };
 
 export default function RootLayout({
@@ -25,8 +27,15 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body className={`${sans.className} bg-white antialiased`}>
-        <Navbar isMarketing={true} loginUrl="http://localhost:3001/login" signupUrl="http://localhost:3001/signup" homeUrl="/" />
-        <main>{children}</main>
+        <Navbar
+          isMarketing={true}
+          loginUrl="http://platform.glaro.org/login"
+          signupUrl="http://platform.glaro.org/signup"
+          homeUrl="http://glaro.org"
+        />
+        <main>
+          <LenisProvider>{children}</LenisProvider>
+        </main>
         <Footer />
       </body>
     </html>

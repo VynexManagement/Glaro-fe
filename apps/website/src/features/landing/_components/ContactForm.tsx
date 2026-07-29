@@ -19,7 +19,7 @@ export function ContactForm() {
           Get in Touch
         </h2>
         <p className="mt-3 text-slate-500 text-base">
-          Have questions? We&apos;re here to help you scale your Shopify agency.
+          Have questions about Shopify opportunity datasets? We&apos;re here to help.
         </p>
       </div>
 
@@ -84,7 +84,7 @@ export function ContactForm() {
                 id="message"
                 rows={4}
                 required
-                placeholder="How can we help?"
+                placeholder="How can we help with your dataset requirements?"
                 className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-[#6366f1] text-sm transition-all duration-200 resize-none"
               />
             </div>
@@ -101,14 +101,14 @@ export function ContactForm() {
         {/* Form Bottom Contacts Bar */}
         <div className="flex flex-col sm:flex-row justify-between items-center pt-6 mt-8 border-t border-slate-100 gap-4">
           <a
-            href="mailto:hello@leadflow.io"
+            href="mailto:hello@glaro.io"
             className="flex items-center gap-2 text-slate-500 hover:text-[#6366f1] transition-colors text-sm font-medium"
           >
             <Mail className="w-4 h-4 text-indigo-500" strokeWidth={2} />
             <span>hello@glaro.io</span>
           </a>
           <a
-            href="https://calendly.com/leadflow"
+            href="https://calendly.com/glaro"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-slate-500 hover:text-[#6366f1] transition-colors text-sm font-medium"
