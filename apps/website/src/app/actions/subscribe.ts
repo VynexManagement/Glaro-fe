@@ -46,24 +46,55 @@ export async function submitWaitlistAction(
     const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
     const spreadsheetId = process.env.GOOGLE_SHEET_ID;
 
-    if (privateKeyRaw && clientEmail && spreadsheetId) {
+    if (!privateKeyRaw || !clientEmail || !spreadsheetId) {
+      console.error("❌ Google Sheets environment variables missing:", {
+        hasPrivateKey: !!privateKeyRaw,
+        hasClientEmail: !!clientEmail,
+        hasSpreadsheetId: !!spreadsheetId,
+      });
+      return {
+        success: false,
+        message: "Google Sheets configuration error. Please ensure environment variables are configured.",
+      };
+    }
+
+    try {
+      // 1. Strip any wrapping quotes or carriage returns
+      let privateKey = privateKeyRaw.trim();
+      privateKey = privateKey.replace(/^["']+|["']+$|\r/g, "");
+      // 2. Unescape \n literals into actual newlines
+      privateKey = privateKey.replace(/\\n/g, "\n");
+
+      // 3. Ensure header and footer are separated by newlines even if pasted as a single concatenated line
+      if (privateKey.includes("-----BEGIN PRIVATE KEY-----") && !privateKey.startsWith("-----BEGIN PRIVATE KEY-----\n")) {
+        privateKey = privateKey.replace("-----BEGIN PRIVATE KEY-----", "-----BEGIN PRIVATE KEY-----\n");
+      }
+      if (privateKey.includes("-----END PRIVATE KEY-----") && !privateKey.endsWith("\n-----END PRIVATE KEY-----")) {
+        privateKey = privateKey.replace("-----END PRIVATE KEY-----", "\n-----END PRIVATE KEY-----");
+      }
+
+      const auth = new google.auth.JWT({
+        email: clientEmail,
+        key: privateKey,
+        scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+      });
+
+      const sheets = google.sheets({ version: "v4", auth });
+
+      // 1. Get existing column A values to find the exact next available row
+      const getRes = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: "Sheet1!A:A",
+      });
+
+      const existingRowsCount = getRes.data.values ? getRes.data.values.length : 0;
+      const nextRow = existingRowsCount + 1;
+
+      // 2. Write the new submission into the next sequential row (e.g. Row 2, Row 3, Row 4...)
       try {
-        // Strip any wrapping quotes or double-quotes and normalize escaped newlines
-        let privateKey = privateKeyRaw.trim();
-        privateKey = privateKey.replace(/^["']+|["']+$|\r/g, "");
-        privateKey = privateKey.replace(/\\n/g, "\n");
-
-        const auth = new google.auth.JWT({
-          email: clientEmail,
-          key: privateKey,
-          scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-        });
-
-        const sheets = google.sheets({ version: "v4", auth });
-
-        await sheets.spreadsheets.values.append({
+        await sheets.spreadsheets.values.update({
           spreadsheetId,
-          range: "A1:F1",
+          range: `Sheet1!A${nextRow}:F${nextRow}`,
           valueInputOption: "USER_ENTERED",
           requestBody: {
             values: [
@@ -78,12 +109,55 @@ export async function submitWaitlistAction(
             ],
           },
         });
-      } catch (sheetsErr) {
-        console.error("Failed to append entry to Google Sheet:", sheetsErr);
-        // Continue flow so user email can still be sent even if sheets fails
+      } catch (updateErr: any) {
+        // If grid limit is reached, expand sheet grid by 10 rows and retry
+        if (updateErr?.message?.includes("exceeds grid limits") || updateErr?.status === 400) {
+          await sheets.spreadsheets.batchUpdate({
+            spreadsheetId,
+            requestBody: {
+              requests: [
+                {
+                  appendDimension: {
+                    sheetId: 0,
+                    dimension: "ROWS",
+                    length: 10,
+                  },
+                },
+              ],
+            },
+          });
+
+          await sheets.spreadsheets.values.update({
+            spreadsheetId,
+            range: `Sheet1!A${nextRow}:F${nextRow}`,
+            valueInputOption: "USER_ENTERED",
+            requestBody: {
+              values: [
+                [
+                  timestamp,
+                  cleanName,
+                  cleanEmail,
+                  cleanOrg,
+                  cleanPurpose,
+                  cleanMessage,
+                ],
+              ],
+            },
+          });
+        } else {
+          throw updateErr;
+        }
       }
-    } else {
-      console.warn("Google Sheets environment variables missing, skipping sheets recording.");
+    } catch (sheetsErr: any) {
+      const errMsg = sheetsErr?.message || String(sheetsErr);
+      console.error("❌ Failed to append entry to Google Sheet:", errMsg);
+      if (sheetsErr?.response?.data) {
+        console.error("Google API Response Error Data:", JSON.stringify(sheetsErr.response.data));
+      }
+      return {
+        success: false,
+        message: `Google Sheets update failed: ${errMsg}`,
+      };
     }
 
     // 3. Resend Email Dispatch
