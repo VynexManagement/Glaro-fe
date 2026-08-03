@@ -10,6 +10,7 @@ import { OpportunityCatalog } from "../features/landing/_components/OpportunityC
 import { PricingGrid } from "../features/landing/_components/PricingGrid";
 import { FAQSection } from "../features/landing/_components/FAQSection";
 import { CTASection } from "../features/landing/_components/CTASection";
+import { WaitlistSection } from "../features/landing/_components/WaitlistSection";
 import { ContactForm } from "../features/landing/_components/ContactForm";
 
 export default function LandingPage() {
@@ -26,6 +27,7 @@ export default function LandingPage() {
       <PricingGrid />
       <FAQSection />
       <CTASection />
+      <WaitlistSection />
       <ContactForm />
     </div>
   );
