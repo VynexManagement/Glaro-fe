@@ -5,6 +5,7 @@ import { Zap, Menu, X, LogOut, LayoutDashboard, Search } from "lucide-react";
 import { cn } from "./utils";
 import { Container } from "./Container";
 import Link from "next/link";
+import Image from "next/image";
 
 export interface NavbarProps {
   isMarketing?: boolean;
@@ -42,7 +43,13 @@ export function Navbar({
           href={homeUrl}
           className="flex items-center gap-2 text-slate-900 font-bold text-xl select-none"
         >
-          <span className="font-extrabold text-2xl tracking-tight bg-slate-900 text-transparent bg-clip-text">
+          <Image 
+            src="/glaro-logo.png"
+            alt="Glaro Logo"
+            width={32}
+            height={32}
+          />
+          <span className="font-extrabold text-2xl tracking-tight bg-slate-900 text-primary bg-clip-text">
             Glaro
           </span>
         </a>
@@ -51,28 +58,34 @@ export function Navbar({
         <div className="hidden md:flex items-center gap-8">
           {isMarketing ? (
             <>
-              <a
+              <Link
                 href="/features"
                 className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
               >
                 Features
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/pricing"
                 className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
               >
                 Pricing
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/contact"
                 className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
               >
                 Contact Us
-              </a>
+              </Link>
+              <Link
+                href="/waitlist"
+                className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
+              >
+                Join Waitlist
+              </Link>
             </>
           ) : (
             <>
-              <a
+              <Link
                 href={queryUrl}
                 className={cn(
                   "flex items-center gap-1.5 text-sm font-medium transition-colors",
@@ -82,9 +95,9 @@ export function Navbar({
                 )}
               >
                 <Search size={15} /> Find Leads
-              </a>
+              </Link>
               {user && (
-                <a
+                <Link
                   href={dashboardUrl}
                   className={cn(
                     "flex items-center gap-1.5 text-sm font-medium transition-colors",
@@ -94,7 +107,7 @@ export function Navbar({
                   )}
                 >
                   <LayoutDashboard size={15} /> Dashboard
-                </a>
+                </Link>
               )}
             </>
           )}

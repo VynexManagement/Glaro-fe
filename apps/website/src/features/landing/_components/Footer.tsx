@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import React from "react";
 
 export function Footer() {
@@ -25,14 +26,19 @@ export function Footer() {
           </h4>
           <ul className="space-y-3 text-sm text-slate-400 font-medium">
             <li>
-              <a href="/features" className="hover:text-[#6366f1] transition-colors duration-200">
+              <Link href="/features" className="hover:text-[#6366f1] transition-colors duration-200">
                 Features
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/contact" className="hover:text-[#6366f1] transition-colors duration-200">
+              <Link href="/contact" className="hover:text-[#6366f1] transition-colors duration-200">
                 Contact Us
-              </a>
+              </Link>
+            </li>
+            <li>
+              <Link href="/waitlist" className="hover:text-[#6366f1] transition-colors duration-200">
+                Join Waitlist
+              </Link>
             </li>
           </ul>
         </div>
