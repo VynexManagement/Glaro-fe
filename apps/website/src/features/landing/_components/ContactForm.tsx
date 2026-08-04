@@ -99,7 +99,7 @@ export function ContactForm() {
         )}
 
         {/* Form Bottom Contacts Bar */}
-        <div className="flex flex-col sm:flex-row justify-between items-center pt-6 mt-8 border-t border-slate-100 gap-4">
+        {/* <div className="flex flex-col sm:flex-row justify-between items-center pt-6 mt-8 border-t border-slate-100 gap-4">
           <a
             href="mailto:hello@glaro.io"
             className="flex items-center gap-2 text-slate-500 hover:text-[#6366f1] transition-colors text-sm font-medium"
@@ -116,7 +116,7 @@ export function ContactForm() {
             <Calendar className="w-4 h-4 text-indigo-500" strokeWidth={2} />
             <span>Book a Strategy Call</span>
           </a>
-        </div>
+        </div> */}
       </div>
     </section>
   );

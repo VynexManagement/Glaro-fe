@@ -3,7 +3,7 @@
 import React from "react";
 import { Button } from "@leadflow/ui";
 
-export function HeroSection() {
+export function HeroSection({disableCTA=false}:{disableCTA?:boolean}) {
   const datasetRows = [
     {
       name: "Glow Beauty",
@@ -44,16 +44,18 @@ export function HeroSection() {
           <Button
             variant="primary"
             size="lg"
-            className="w-full sm:w-auto px-8 py-3.5 text-base shadow-lg shadow-indigo-500/10 transition-all hover:scale-[1.01] active:scale-[0.99] bg-[#6366f1] hover:bg-[#4f46e5]"
-            onClick={() => (window.location.href = "http://localhost:3001/query")}
+            disabled={disableCTA}
+            className={`w-full sm:w-auto px-8 py-3.5 text-base shadow-lg shadow-indigo-500/10 transition-all hover:scale-[1.01] active:scale-[0.99] bg-[#6366f1] hover:bg-[#4f46e5]`}
+            onClick={() => (window.location.href = "http://platform.glaro.org/query")}
           >
             Generate Dataset
           </Button>
           <Button
             variant="outline"
             size="lg"
+            disabled={disableCTA}
             className="w-full sm:w-auto px-8 py-3.5 text-base transition-all hover:scale-[1.01] active:scale-[0.99] border-slate-200 text-indigo-600 hover:bg-slate-50"
-            onClick={() => (window.location.href = "http://localhost:3001/signup")}
+            onClick={() => (window.location.href = "http://platform.glaro.org/signup")}
           >
             Explore Datasets
           </Button>

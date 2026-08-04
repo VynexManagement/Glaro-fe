@@ -14,6 +14,7 @@ export function CTASection() {
           Generate opportunity-driven Shopify datasets and start reaching businesses with real growth potential.
         </p>
         <Button
+          disabled={true}
           variant="primary"
           className="mt-8 px-8 py-3.5 bg-[#6366f1] hover:bg-[#4f46e5] shadow-lg shadow-indigo-500/10 transition-all hover:scale-[1.01] active:scale-[0.99]"
           size="lg"

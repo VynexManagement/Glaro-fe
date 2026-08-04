@@ -16,7 +16,7 @@ import { ContactForm } from "../features/landing/_components/ContactForm";
 export default function LandingPage() {
   return (
     <div className="flex flex-col items-center w-full bg-white select-none overflow-x-hidden">
-      <HeroSection />
+      <HeroSection disableCTA={true} />
       <TrustLogobar />
       <HowItWorks />
       <OpportunitySignals />

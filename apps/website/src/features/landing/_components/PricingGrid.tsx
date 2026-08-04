@@ -48,6 +48,7 @@ export function PricingGrid() {
           </ul>
           <Button
             variant="outline"
+            disabled={true}
             className="w-full border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-all duration-200 active:scale-[0.98]"
             onClick={() => (window.location.href = "http://localhost:3001/query")}
           >
@@ -86,6 +87,7 @@ export function PricingGrid() {
           </ul>
           <Button
             variant="primary"
+            disabled={true}
             className="w-full bg-[#6366f1] hover:bg-[#4f46e5] shadow-lg shadow-indigo-500/10 transition-all duration-200 active:scale-[0.98]"
             onClick={() => (window.location.href = "http://localhost:3001/query")}
           >
@@ -121,6 +123,7 @@ export function PricingGrid() {
           </ul>
           <Button
             variant="outline"
+            disabled={true}
             className="w-full border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-all duration-200 active:scale-[0.98]"
             onClick={() => (window.location.href = "http://localhost:3001/query")}
           >

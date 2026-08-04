@@ -4,6 +4,7 @@ import * as React from "react";
 import { Zap, Menu, X, LogOut, LayoutDashboard, Search } from "lucide-react";
 import { cn } from "./utils";
 import { Container } from "./Container";
+import Link from "next/link";
 
 export interface NavbarProps {
   isMarketing?: boolean;
@@ -15,6 +16,7 @@ export interface NavbarProps {
   dashboardUrl?: string;
   queryUrl?: string;
   homeUrl?: string;
+  dissabled?: boolean;
 }
 
 export function Navbar({
@@ -27,15 +29,19 @@ export function Navbar({
   dashboardUrl = "/dashboard",
   queryUrl = "/query",
   homeUrl = "/",
+  dissabled = false,
 }: NavbarProps) {
   const [menuOpen, setMenuOpen] = React.useState(false);
   const isActive = (path: string) => activePath === path;
 
   return (
     <nav className="sticky top-0 z-50 bg-white/70 backdrop-blur-md border-b border-slate-100/80 transition-premium">
-       <Container className="h-16 flex items-center justify-between">
+      <Container className="h-16 flex items-center justify-between">
         {/* Logo */}
-        <a href={homeUrl} className="flex items-center gap-2 text-slate-900 font-bold text-xl select-none">
+        <a
+          href={homeUrl}
+          className="flex items-center gap-2 text-slate-900 font-bold text-xl select-none"
+        >
           <span className="font-extrabold text-2xl tracking-tight bg-slate-900 text-transparent bg-clip-text">
             Glaro
           </span>
@@ -70,7 +76,9 @@ export function Navbar({
                 href={queryUrl}
                 className={cn(
                   "flex items-center gap-1.5 text-sm font-medium transition-colors",
-                  isActive(queryUrl) ? "text-[#6366f1]" : "text-slate-500 hover:text-slate-900"
+                  isActive(queryUrl)
+                    ? "text-[#6366f1]"
+                    : "text-slate-500 hover:text-slate-900",
                 )}
               >
                 <Search size={15} /> Find Leads
@@ -80,7 +88,9 @@ export function Navbar({
                   href={dashboardUrl}
                   className={cn(
                     "flex items-center gap-1.5 text-sm font-medium transition-colors",
-                    isActive(dashboardUrl) ? "text-[#6366f1]" : "text-slate-500 hover:text-slate-900"
+                    isActive(dashboardUrl)
+                      ? "text-[#6366f1]"
+                      : "text-slate-500 hover:text-slate-900",
                   )}
                 >
                   <LayoutDashboard size={15} /> Dashboard
@@ -94,18 +104,26 @@ export function Navbar({
         <div className="hidden md:flex items-center gap-4">
           {isMarketing ? (
             <>
-              <a
+              <Link
                 href={loginUrl}
-                className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
+                aria-disabled={dissabled}
+                onClick={(e) => {
+                  if (dissabled) e.preventDefault();
+                }}
+                className={`${dissabled ? "cursor-not-allowed " : "cusor-pointer"} text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors`}
               >
                 Login
-              </a>
-              <a
+              </Link>
+              <Link
                 href={signupUrl}
-                className="bg-[#6366f1] text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-[#4f46e5] shadow-sm hover:shadow-indigo-500/15 transition-premium"
+                aria-disabled={dissabled}
+                onClick={(e) => {
+                  if (dissabled) e.preventDefault();
+                }}
+                className={`${dissabled ? "cursor-not-allowed" : "cusor-pointer"} bg-[#6366f1] text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-[#4f46e5] shadow-sm hover:shadow-indigo-500/15 transition-premium disabled:opacity-50 disabled:pointer-events-none`}
               >
                 Get Started
-              </a>
+              </Link>
             </>
           ) : (
             <>
@@ -123,18 +141,18 @@ export function Navbar({
                 </>
               ) : (
                 <>
-                  <a
+                  <Link
                     href={loginUrl}
-                    className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
+                    className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors disabled:opacity-50 disabled:pointer-events-none"
                   >
                     Login
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href={signupUrl}
-                    className="bg-[#6366f1] text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-[#4f46e5] shadow-sm hover:shadow-indigo-500/15 transition-premium"
+                    className="bg-[#6366f1] text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-[#4f46e5] shadow-sm hover:shadow-indigo-500/15 transition-premium dissabled:opacity-50 disabled:pointer-events-none"
                   >
                     Get Started
-                  </a>
+                  </Link>
                 </>
               )}
             </>
@@ -148,8 +166,6 @@ export function Navbar({
         >
           {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
-      
-      
       </Container>
 
       {/* Mobile Menu */}
@@ -202,7 +218,7 @@ export function Navbar({
                 href={queryUrl}
                 className={cn(
                   "flex items-center gap-2 text-sm font-medium",
-                  isActive(queryUrl) ? "text-[#6366f1]" : "text-slate-600"
+                  isActive(queryUrl) ? "text-[#6366f1]" : "text-slate-600",
                 )}
                 onClick={() => setMenuOpen(false)}
               >
@@ -213,7 +229,9 @@ export function Navbar({
                   href={dashboardUrl}
                   className={cn(
                     "flex items-center gap-2 text-sm font-medium",
-                    isActive(dashboardUrl) ? "text-[#6366f1]" : "text-slate-600"
+                    isActive(dashboardUrl)
+                      ? "text-[#6366f1]"
+                      : "text-slate-600",
                   )}
                   onClick={() => setMenuOpen(false)}
                 >

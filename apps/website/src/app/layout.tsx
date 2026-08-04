@@ -32,6 +32,7 @@ export default function RootLayout({
           loginUrl="http://platform.glaro.org/login"
           signupUrl="http://platform.glaro.org/signup"
           homeUrl="http://glaro.org"
+          dissabled={true}
         />
         <main>
           <LenisProvider>{children}</LenisProvider>
