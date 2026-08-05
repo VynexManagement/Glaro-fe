@@ -1,6 +1,5 @@
 "use server";
 
-import { google } from "googleapis";
 import { Resend } from "resend";
 
 export interface SubscribeInput {
@@ -16,6 +15,179 @@ export interface SubscribeResponse {
   message: string;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Google Sheets via Web Crypto + fetch
+// Uses ONLY Web Crypto API (crypto.subtle) — fully compatible with:
+// Cloudflare Workers, Netlify Edge, Vercel Edge, and standard Node.js.
+// Zero googleapis dependency needed.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function b64url(input: string | ArrayBuffer): string {
+  const str =
+    typeof input === "string"
+      ? input
+      : String.fromCharCode(...new Uint8Array(input));
+  return btoa(str).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+}
+
+async function getGoogleAccessToken(
+  clientEmail: string,
+  privateKeyPem: string
+): Promise<string> {
+  const now = Math.floor(Date.now() / 1000);
+
+  const header = b64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  const payload = b64url(
+    JSON.stringify({
+      iss: clientEmail,
+      scope: "https://www.googleapis.com/auth/spreadsheets",
+      aud: "https://oauth2.googleapis.com/token",
+      exp: now + 3600,
+      iat: now,
+    })
+  );
+
+  const signingInput = `${header}.${payload}`;
+
+  // Strip PEM headers/footers and whitespace to get the raw base64 DER key
+  const pemBody = privateKeyPem
+    .replace(/-----BEGIN PRIVATE KEY-----/g, "")
+    .replace(/-----END PRIVATE KEY-----/g, "")
+    .replace(/\s+/g, "");
+
+  const keyBytes = Uint8Array.from(atob(pemBody), (c) => c.charCodeAt(0));
+
+  const cryptoKey = await crypto.subtle.importKey(
+    "pkcs8",
+    keyBytes,
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  const signatureBuffer = await crypto.subtle.sign(
+    "RSASSA-PKCS1-v1_5",
+    cryptoKey,
+    new TextEncoder().encode(signingInput)
+  );
+
+  const jwt = `${signingInput}.${b64url(signatureBuffer)}`;
+
+  // Exchange the signed JWT for an OAuth2 access token
+  const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+      assertion: jwt,
+    }),
+  });
+
+  const tokenData = (await tokenRes.json()) as Record<string, string>;
+
+  if (!tokenData.access_token) {
+    throw new Error(
+      `Google OAuth token exchange failed: ${JSON.stringify(tokenData)}`
+    );
+  }
+
+  return tokenData.access_token;
+}
+
+function parsePrivateKey(raw: string): string {
+  // 1. Strip wrapping quotes/carriage returns
+  let key = raw.trim().replace(/^["']+|["']+$|\r/g, "");
+  // 2. Unescape \n literals
+  key = key.replace(/\\n/g, "\n");
+  // 3. Ensure header/footer have surrounding newlines even if concatenated
+  key = key
+    .replace(/-----BEGIN PRIVATE KEY-----\s*/g, "-----BEGIN PRIVATE KEY-----\n")
+    .replace(/\s*-----END PRIVATE KEY-----/g, "\n-----END PRIVATE KEY-----");
+  return key;
+}
+
+async function appendToGoogleSheet(
+  spreadsheetId: string,
+  accessToken: string,
+  row: string[]
+): Promise<void> {
+  const base = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}`;
+  const headers = {
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+  };
+
+  // 1. Count existing rows in column A to find the next available row
+  const getRes = await fetch(`${base}/values/Sheet1!A:A`, { headers });
+  if (!getRes.ok) {
+    const errText = await getRes.text();
+    throw new Error(`Sheets GET failed (${getRes.status}): ${errText}`);
+  }
+  const getData = (await getRes.json()) as { values?: string[][] };
+  const nextRow = (getData.values?.length ?? 0) + 1;
+
+  // 2. Attempt to write to the next row
+  const writeRange = `Sheet1!A${nextRow}:F${nextRow}`;
+  const putRes = await fetch(
+    `${base}/values/${encodeURIComponent(writeRange)}?valueInputOption=USER_ENTERED`,
+    {
+      method: "PUT",
+      headers,
+      body: JSON.stringify({ values: [row] }),
+    }
+  );
+
+  if (!putRes.ok) {
+    const errData = (await putRes.json()) as { error?: { message?: string; status?: string } };
+    const errMsg = errData?.error?.message ?? `HTTP ${putRes.status}`;
+
+    // Grid limit hit — expand by 10 rows and retry once
+    if (putRes.status === 400 && errMsg.includes("exceeds grid limits")) {
+      const expandRes = await fetch(`${base}:batchUpdate`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          requests: [
+            {
+              appendDimension: {
+                sheetId: 0,
+                dimension: "ROWS",
+                length: 10,
+              },
+            },
+          ],
+        }),
+      });
+
+      if (!expandRes.ok) {
+        const expandErr = await expandRes.text();
+        throw new Error(`Grid expansion failed: ${expandErr}`);
+      }
+
+      // Retry the write
+      const retryRes = await fetch(
+        `${base}/values/${encodeURIComponent(writeRange)}?valueInputOption=USER_ENTERED`,
+        {
+          method: "PUT",
+          headers,
+          body: JSON.stringify({ values: [row] }),
+        }
+      );
+
+      if (!retryRes.ok) {
+        const retryErr = await retryRes.text();
+        throw new Error(`Sheets write failed after grid expansion: ${retryErr}`);
+      }
+    } else {
+      throw new Error(`Sheets write failed: ${errMsg}`);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main Server Action
+// ─────────────────────────────────────────────────────────────────────────────
+
 export async function submitWaitlistAction(
   data: SubscribeInput
 ): Promise<SubscribeResponse> {
@@ -30,7 +202,10 @@ export async function submitWaitlistAction(
       return { success: false, message: "Valid email is required." };
     }
     if (!purpose || !purpose.trim()) {
-      return { success: false, message: "Please specify your purpose / use case." };
+      return {
+        success: false,
+        message: "Please specify your purpose / use case.",
+      };
     }
 
     const cleanName = name.trim();
@@ -38,10 +213,9 @@ export async function submitWaitlistAction(
     const cleanOrg = organisation ? organisation.trim() : "";
     const cleanPurpose = purpose.trim();
     const cleanMessage = message ? message.trim() : "";
-
     const timestamp = new Date().toISOString();
 
-    // 2. Google Sheets Integration
+    // 2. Google Sheets Integration (Web Crypto + fetch — edge runtime compatible)
     const privateKeyRaw = process.env.GOOGLE_PRIVATE_KEY;
     const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
     const spreadsheetId = process.env.GOOGLE_SHEET_ID;
@@ -54,106 +228,25 @@ export async function submitWaitlistAction(
       });
       return {
         success: false,
-        message: "Google Sheets configuration error. Please ensure environment variables are configured.",
+        message:
+          "Google Sheets configuration error. Please ensure environment variables are configured.",
       };
     }
 
     try {
-      // 1. Strip any wrapping quotes or carriage returns
-      let privateKey = privateKeyRaw.trim();
-      privateKey = privateKey.replace(/^["']+|["']+$|\r/g, "");
-      // 2. Unescape \n literals into actual newlines
-      privateKey = privateKey.replace(/\\n/g, "\n");
-
-      // 3. Ensure header and footer are separated by newlines even if pasted as a single concatenated line
-      if (privateKey.includes("-----BEGIN PRIVATE KEY-----") && !privateKey.startsWith("-----BEGIN PRIVATE KEY-----\n")) {
-        privateKey = privateKey.replace("-----BEGIN PRIVATE KEY-----", "-----BEGIN PRIVATE KEY-----\n");
-      }
-      if (privateKey.includes("-----END PRIVATE KEY-----") && !privateKey.endsWith("\n-----END PRIVATE KEY-----")) {
-        privateKey = privateKey.replace("-----END PRIVATE KEY-----", "\n-----END PRIVATE KEY-----");
-      }
-
-      const auth = new google.auth.JWT({
-        email: clientEmail,
-        key: privateKey,
-        scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-      });
-
-      const sheets = google.sheets({ version: "v4", auth });
-
-      // 1. Get existing column A values to find the exact next available row
-      const getRes = await sheets.spreadsheets.values.get({
-        spreadsheetId,
-        range: "Sheet1!A:A",
-      });
-
-      const existingRowsCount = getRes.data.values ? getRes.data.values.length : 0;
-      const nextRow = existingRowsCount + 1;
-
-      // 2. Write the new submission into the next sequential row (e.g. Row 2, Row 3, Row 4...)
-      try {
-        await sheets.spreadsheets.values.update({
-          spreadsheetId,
-          range: `Sheet1!A${nextRow}:F${nextRow}`,
-          valueInputOption: "USER_ENTERED",
-          requestBody: {
-            values: [
-              [
-                timestamp,
-                cleanName,
-                cleanEmail,
-                cleanOrg,
-                cleanPurpose,
-                cleanMessage,
-              ],
-            ],
-          },
-        });
-      } catch (updateErr: any) {
-        // If grid limit is reached, expand sheet grid by 10 rows and retry
-        if (updateErr?.message?.includes("exceeds grid limits") || updateErr?.status === 400) {
-          await sheets.spreadsheets.batchUpdate({
-            spreadsheetId,
-            requestBody: {
-              requests: [
-                {
-                  appendDimension: {
-                    sheetId: 0,
-                    dimension: "ROWS",
-                    length: 10,
-                  },
-                },
-              ],
-            },
-          });
-
-          await sheets.spreadsheets.values.update({
-            spreadsheetId,
-            range: `Sheet1!A${nextRow}:F${nextRow}`,
-            valueInputOption: "USER_ENTERED",
-            requestBody: {
-              values: [
-                [
-                  timestamp,
-                  cleanName,
-                  cleanEmail,
-                  cleanOrg,
-                  cleanPurpose,
-                  cleanMessage,
-                ],
-              ],
-            },
-          });
-        } else {
-          throw updateErr;
-        }
-      }
+      const privateKey = parsePrivateKey(privateKeyRaw);
+      const accessToken = await getGoogleAccessToken(clientEmail, privateKey);
+      await appendToGoogleSheet(spreadsheetId, accessToken, [
+        timestamp,
+        cleanName,
+        cleanEmail,
+        cleanOrg,
+        cleanPurpose,
+        cleanMessage,
+      ]);
     } catch (sheetsErr: any) {
       const errMsg = sheetsErr?.message || String(sheetsErr);
-      console.error("❌ Failed to append entry to Google Sheet:", errMsg);
-      if (sheetsErr?.response?.data) {
-        console.error("Google API Response Error Data:", JSON.stringify(sheetsErr.response.data));
-      }
+      console.error("❌ Failed to write to Google Sheet:", errMsg);
       return {
         success: false,
         message: `Google Sheets update failed: ${errMsg}`,
@@ -164,13 +257,13 @@ export async function submitWaitlistAction(
     const resendApiKey = process.env.RESEND_API_KEY;
     const notificationEmailTo = process.env.NOTIFICATION_EMAIL_TO;
     const senderEmail =
-      process.env.SENDER_EMAIL || "Glaor <no-reply@resend.dev>";
+      process.env.SENDER_EMAIL || "Glaro <no-reply@resend.dev>";
 
     if (resendApiKey) {
       try {
         const resend = new Resend(resendApiKey);
 
-        // A. Send Notification Email to Admin/Owner
+        // A. Admin Notification Email
         if (notificationEmailTo) {
           await resend.emails.send({
             from: senderEmail,
@@ -209,19 +302,19 @@ export async function submitWaitlistAction(
           });
         }
 
-        // B. Send Confirmation Email to Subscriber
+        // B. Subscriber Confirmation Email
         await resend.emails.send({
           from: senderEmail,
           to: cleanEmail,
-          subject: `You're on the Glaor Early Access List! 🎉`,
+          subject: `You're on the Glaro Early Access List! 🎉`,
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
               <div style="text-align: center; margin-bottom: 24px;">
-                <h1 style="color: #4f46e5; font-size: 24px; margin: 0;">Welcome to Glaor Early Access</h1>
+                <h1 style="color: #4f46e5; font-size: 24px; margin: 0;">Welcome to Glaro Early Access</h1>
               </div>
               <p style="font-size: 16px; color: #334155; line-height: 1.6;">Hi ${cleanName},</p>
               <p style="font-size: 16px; color: #334155; line-height: 1.6;">
-                Thank you for applying for early access to <strong>Glaor</strong>! We've received your request and recorded your details.
+                Thank you for applying for early access to <strong>Glaro</strong>! We've received your request and recorded your details.
               </p>
               <p style="font-size: 16px; color: #334155; line-height: 1.6;">
                 We are actively onboarding early users in batches to give everyone the best possible experience. We'll send you an invitation email as soon as your account is ready.
@@ -237,7 +330,7 @@ export async function submitWaitlistAction(
               </p>
               <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
               <p style="font-size: 12px; color: #94a3b8; text-align: center; margin: 0;">
-                © ${new Date().getFullYear()} Glaor. All rights reserved.
+                © ${new Date().getFullYear()} Glaro. All rights reserved.
               </p>
             </div>
           `,
@@ -246,7 +339,9 @@ export async function submitWaitlistAction(
         console.error("Failed to send email via Resend:", emailErr);
       }
     } else {
-      console.warn("RESEND_API_KEY environment variable missing, skipping email send.");
+      console.warn(
+        "RESEND_API_KEY environment variable missing, skipping email send."
+      );
     }
 
     return {
@@ -257,7 +352,8 @@ export async function submitWaitlistAction(
     console.error("Error in submitWaitlistAction:", error);
     return {
       success: false,
-      message: error?.message || "An unexpected error occurred. Please try again.",
+      message:
+        error?.message || "An unexpected error occurred. Please try again.",
     };
   }
 }

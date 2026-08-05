@@ -78,7 +78,7 @@ export function Navbar({
               </Link>
               <Link
                 href="/waitlist"
-                className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
+                className="text-sm font-medium text-indigo-500 hover:text-indigo-700 font-semibold transition-colors"
               >
                 Join Waitlist
               </Link>
@@ -206,6 +206,13 @@ export function Navbar({
                 onClick={() => setMenuOpen(false)}
               >
                 Contact Us
+              </a>
+              <a
+                href="/waitlist"
+                className="text-sm font-semibold text-indigo-500 hover:text-indigo-700"
+                onClick={() => setMenuOpen(false)}
+              >
+                Join Waitlist
               </a>
               <hr className="border-slate-100" />
               <div className="flex items-center gap-4">
