@@ -5,6 +5,7 @@
    "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",
+    "start": "next start",
     "preview": "opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare deploy"
   },
