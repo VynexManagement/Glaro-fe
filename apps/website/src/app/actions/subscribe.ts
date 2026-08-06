@@ -214,36 +214,7 @@ export async function submitWaitlistAction(
     const cleanPurpose = purpose.trim();
     const cleanMessage = message ? message.trim() : "";
     const timestamp = new Date().toISOString();
-    console.log("========== ENV DEBUG ==========");
-console.log("NODE_ENV:", process.env.NODE_ENV);
-
-console.log(
-  "GOOGLE_PRIVATE_KEY exists:",
-  !!process.env.GOOGLE_PRIVATE_KEY
-);
-
-console.log(
-  "GOOGLE_SERVICE_ACCOUNT_EMAIL exists:",
-  !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL
-);
-
-console.log(
-  "GOOGLE_SHEET_ID exists:",
-  !!process.env.GOOGLE_SHEET_ID
-);
-
-console.log(
-  "Total ENV keys:",
-  Object.keys(process.env).length
-);
-
-console.log(
-  "ENV Keys:",
-  Object.keys(process.env).sort()
-);
-console.log("Worker Version:", process.env.CF_VERSION_METADATA);
-console.log("Request Time:", new Date().toISOString());
-console.log("===============================");
+   
     // 2. Google Sheets Integration (Web Crypto + fetch — edge runtime compatible)
     const privateKeyRaw = process.env.GOOGLE_PRIVATE_KEY;
     const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
