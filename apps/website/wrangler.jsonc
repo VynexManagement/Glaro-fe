@@ -6,6 +6,11 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
+  "keep_vars": true,
+  "vars": {
+    "SENDER_EMAIL": "waitlist@signups.glaro.org",
+    "NOTIFICATION_EMAIL_TO": "codeaniket123@gmail.com"
+  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
